@@ -1,20 +1,69 @@
-// ConsoleApplication1.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+/*************************************************
+*                                                *
+*  EasyBMP Cross-Platform Windows Bitmap Library *
+*                                                *
+*  Author: Paul Macklin                          *
+*   email: macklin01@users.sourceforge.net       *
+* support: http://easybmp.sourceforge.net        *
+*                                                *
+*          file: EasyBMPsample.cpp               *
+*    date added: 03-31-2006                      *
+* date modified: 12-01-2006                      *
+*       version: 1.06                            *
+*                                                *
+*   License: BSD (revised/modified)              *
+* Copyright: 2005-6 by the EasyBMP Project       *
+*                                                *
+* description: Sample application to demonstrate *
+*              some functions and capabilities   *
+*                                                *
+*************************************************/
 
+#include "EasyBMP.h"
+#include <windows.h>
 #include <iostream>
 
+#pragma comment(lib, "Gdi32.lib")
+#pragma comment(lib, "User32.lib")
+
+using namespace std;
+
+void DrwImage(std::string imagePath, HDC* console);
 int main()
 {
-    std::cout << "Hello World!\n";
+    //Get current console handle
+    HWND console = GetConsoleWindow();
+    //Get a handle to console
+    HDC dc = GetDC(console);
+    // Call DrwImage. It must be a bitmap image
+
+    while (true)
+    {
+        DrwImage("5b27291ba6e054be0df1.bmp", &dc);
+        Sleep(5000);
+    }
+
+    return 0;
 }
+void DrwImage(std::string imagePath, HDC* console) {
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+    BMP image;
+    image.ReadFromFile(imagePath.c_str());
+    //image.SetBitDepth(32);
+    for (int x = 0; x < image.TellWidth(); x++)
+    {
+        for (int y = 0; y < image.TellHeight(); y++)
+        {
+            int RED = image.GetPixel(x, y).Red;
+            int GREEN = image.GetPixel(x, y).Green;
+            int BLUE = image.GetPixel(x, y).Blue;
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+            int ALPHA = image.GetPixel(x, y).Alpha;
+
+            COLORREF COLOUR = RGB(RED, GREEN, BLUE);
+            if (ALPHA == 0) {
+                SetPixel(*console, x, y, COLOUR);
+            }
+        }
+    }
+}
